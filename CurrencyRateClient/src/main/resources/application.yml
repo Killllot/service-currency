@@ -1,0 +1,15 @@
+server:
+  port: 8082
+
+app:
+  cache:
+    size: 365
+  rest:
+    api:
+      prefix: /api
+
+cbr-rate-client:
+  url: "http://localhost:8081/api/currencyRate"
+
+
+

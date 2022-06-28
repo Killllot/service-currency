@@ -1,0 +1,5 @@
+rootProject.name = 'service-currency'
+include 'cbrRate'
+include 'currencyRateClient'
+
+
