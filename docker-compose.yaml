@@ -1,0 +1,121 @@
+version: '3.8'
+
+networks:
+  kafka-net:
+    name: kafka-net
+    driver: bridge
+
+services:
+#  postgres:
+#    image: 'postgres:14'
+#    container_name: 'docker-compose-pg'
+#    command:
+#      - "postgres"
+#      - "-c"
+#      - "max_connections=50"
+#      - "-c"
+#      - "shared_buffers=1GB"
+#      - "-c"
+#      - "effective_cache_size=4GB"
+#      - "-c"
+#      - "work_mem=16MB"
+#      - "-c"
+#      - "maintenance_work_mem=512MB"
+#      - "-c"
+#      - "random_page_cost=1.1"
+#      - "-c"
+#      - "temp_file_limit=10GB"
+#      - "-c"
+#      - "log_min_duration_statement=200ms"
+#      - "-c"
+#      - "idle_in_transaction_session_timeout=10s"
+#      - "-c"
+#      - "lock_timeout=1s"
+#      - "-c"
+#      - "statement_timeout=60s"
+#      - "-c"
+#      - "shared_preload_libraries=pg_stat_statements"
+#      - "-c"
+#      - "pg_stat_statements.max=10000"
+#      - "-c"
+#      - "pg_stat_statements.track=all"
+#    ports:
+#      - 5432:5432
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1'
+#          memory: 4G
+#    environment:
+#      POSTGRES_BD: "postgres"
+#      POSTGRES_USER: "postgres"
+#      POSTGRES_PASSWORD: "Kirill"
+#
+#  application:
+#    container_name: application
+#    build:
+#      context: ./main
+#      dockerfile: Dockerfile
+#    environment:
+#      - DB_URL=postgres
+#      - DB_USER=postgres
+#      - DB_PASSWORD=Kirill
+#    depends_on:
+#      - postgres
+#    ports:
+#      - "8080:8080"
+
+#  zookeeper:
+#    image: zookeeper:3.7.0
+#    container_name: zookeeper
+#    restart: "no"
+#    networks:
+#     - kafka-net
+#    ports:
+#      - "2181:2181"
+
+  kafka:
+    image: obsidiandynamics/kafka
+    container_name: kafka
+    restart: "no"
+    networks:
+      - kafka-net
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:PLAINTEXT,DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: DOCKER_INTERNAL://:19092,DOCKER_EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: DOCKER_INTERNAL://kafka:19092,DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    container_name: kafdrop
+    restart: "no"
+    networks:
+      - kafka-net
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:19092"
+    depends_on:
+      - "kafka"
+
+  kowl:
+    image: quay.io/cloudhut/kowl:v1.4.0
+    restart: on-failure
+    volumes:
+      - ./kowl_config:/etc/kowl/
+    ports:
+      - "8088:8080"
+    entrypoint: ./kowl --config.filepath=/etc/kowl/config.yaml
+    networks:
+      - kafka-net
+    depends_on:
+      - kafka
+      - zookeeper

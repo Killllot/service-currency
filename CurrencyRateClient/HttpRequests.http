@@ -3,4 +3,8 @@ GET http://localhost:8082/api/currencyRate/CBR/EUR/25-06-2022
 Accept: */*
 Content-Type: application/json
 Cache-Control: no-cache
-
+###
+GET http://localhost:8082/api/currencyRate/TKF/EUR/25-06-2022
+Accept: */*
+Content-Type: application/json
+Cache-Control: no-cache

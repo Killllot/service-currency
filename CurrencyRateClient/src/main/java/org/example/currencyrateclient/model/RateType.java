@@ -1,7 +1,8 @@
 package org.example.currencyrateclient.model;
 
 public enum RateType {
-    CBR("cbr");
+    CBR("cbr"),
+    TKF("tkf");
 
     String serviceName;
 
