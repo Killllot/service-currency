@@ -14,4 +14,7 @@ tkf-rate-client:
   url: "http://localhost:8081/api/currencyRate"
 
 
+topic:
+  name: t.currency
+
 
